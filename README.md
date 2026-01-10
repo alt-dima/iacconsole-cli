@@ -1,13 +1,13 @@
-# Configuration Management for OpenTofu and Terraform
+# IaCConsole CLI — Configuration Management for OpenTofu and Terraform
 
-[![GitHub stars](https://img.shields.io/github/stars/alt-dima/tofugu)](https://github.com/alt-dima/tofugu)
-[![GitHub license](https://img.shields.io/github/license/alt-dima/tofugu)](https://github.com/alt-dima/tofugu/blob/main/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/alt-dima/tofugu)](https://goreportcard.com/report/github.com/alt-dima/tofugu)
-[![GitHub release](https://img.shields.io/github/v/release/alt-dima/tofugu)](https://github.com/alt-dima/tofugu/releases)
+[![GitHub stars](https://img.shields.io/github/stars/alt-dima/iacconsole-cli)](https://github.com/alt-dima/iacconsole-cli)
+[![GitHub license](https://img.shields.io/github/license/alt-dima/iacconsole-cli)](https://github.com/alt-dima/iacconsole-cli/blob/main/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alt-dima/iacconsole-cli)](https://goreportcard.com/report/github.com/alt-dima/iacconsole-cli)
+[![GitHub release](https://img.shields.io/github/v/release/alt-dima/iacconsole-cli)](https://github.com/alt-dima/iacconsole-cli/releases)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-blue)](https://golang.org/)
-[![Downloads](https://img.shields.io/github/downloads/alt-dima/tofugu/total)](https://github.com/alt-dima/tofugu/releases)
+[![Downloads](https://img.shields.io/github/downloads/alt-dima/iacconsole-cli/total)](https://github.com/alt-dima/iacconsole-cli/releases)
 
-`tofugu` is a configuration management CLI that dynamically orchestrates OpenTofu or Terraform deployments. It separates infrastructure configuration from code, enabling DevOps teams to reuse Terraform modules across multiple environments (dev, staging, production) without code duplication. Configuration can be sourced from files or a Configuration Management Database (CMDB) with an OpenAPI-powered interface called Toaster.
+IaCConsole CLI is a configuration management tool that dynamically orchestrates OpenTofu or Terraform deployments. It separates infrastructure configuration from code, enabling DevOps teams to reuse Terraform modules across multiple environments (dev, staging, production) without code duplication. Configuration can be sourced from files or the IaCConsole API (CMDB), an OpenAPI-powered configuration database.
 
 ## Table of Contents
 
@@ -38,14 +38,14 @@
 You will need any Kubernetes cluster (best small temporary like Podman+Kind or MiniKube).
 Check that kubectl context poiting to this test cluster! Not Production!
 
-For a full end-to-end example of using TofuGu in a CI/CD pipeline, see the pre-configured Jenkins deployment in [examples/jenkins/README.md](examples/jenkins/README.md).
+For a full end-to-end example of using IaCConsole CLI in a CI/CD pipeline, see the pre-configured Jenkins deployment in [examples/jenkins/README.md](examples/jenkins/README.md).
 <img width="1432" height="1188" alt="2025-11-07_20-41" src="https://github.com/user-attachments/assets/76a6e8b5-16cc-4818-840e-22603e38bc63" />
 
 ## Installation
 
 ### Download Pre-built Binaries
 
-1. Download the latest release from [GitHub Releases](https://github.com/alt-dima/tofugu/releases) (version >= 0.5.0)
+1. Download the latest release from [GitHub Releases](https://github.com/alt-dima/iacconsole-cli/releases) (version >= 0.5.0)
 2. Extract the binary for your platform (Linux/macOS)
 3. Make it executable: `chmod +x tofugu`
 4. Move to your PATH: `sudo mv tofugu /usr/local/bin/`
@@ -53,8 +53,8 @@ For a full end-to-end example of using TofuGu in a CI/CD pipeline, see the pre-c
 ### Build from Source
 
 ```bash
-git clone https://github.com/alt-dima/tofugu.git
-cd tofugu
+git clone https://github.com/alt-dima/iacconsole-cli.git
+cd iacconsole-cli
 go build -o bin/tofugu .
 ```
 
@@ -66,7 +66,7 @@ go build -o bin/tofugu .
 ## Quick start locally with demo configuration
 
 2. Install [OpenTofu](https://opentofu.org/docs/intro/install/)
-3. Execute to generate simple demo configuration with connection to demo account in [Configuration Management Database (CMDB) with OpenAPI - Toaster](#configuration-management-database-cmdb-with-openapi---toaster):
+3. Execute to generate simple demo configuration with connection to demo account in the [IaCConsole API (CMDB)](#configuration-management-database-cmdb---iacconsole-api):
 
 ```bash
 tofugu init
@@ -82,27 +82,28 @@ tofugu init --toaster=false
 
 ## Quick start with AI Coding Assistants
 
-Getting started with `tofugu` is even easier using AI coding assistants:
+Getting started with IaCConsole CLI is even easier using AI coding assistants:
 
 1. Open the repository in your preferred editor with an AI assistant installed:
 
-   - GitHub Copilot in VS Code
-   - Cursor
-   - Claude/Anthropic
-   - WindSurf
-   - Cline
+- GitHub Copilot in VS Code
+- Cursor
+- Claude/Anthropic
+- WindSurf
+- Cline
 
 2. Ask questions like:
-   - "How do I set up tofugu for AWS resources?"
-   - "Help me create a new tofi for a GCP instance"
-   - "How do I use Toaster CMDB with tofugu?"
-   - "Show me how to pass environment variables to my terraform code"
+
+- "How do I set up IaCConsole for AWS resources?"
+- "Help me create a new tofi for a GCP instance"
+- "How do I use the IaCConsole API (CMDB)?"
+- "Show me how to pass environment variables to my terraform code"
 
 These instructions provide context about:
 
-- The architecture and key concepts of tofugu
+- The architecture and key concepts of IaCConsole CLI
 - How to work with tofies, dimensions, and inventory sources
-- Integration with Toaster CMDB (OpenAPI-powered Configuration Management Console) for centralized configuration
+- Integration with the IaCConsole API (CMDB) and IaCConsole Web UI for centralized configuration
 - Project-specific conventions and workflows
 
 For more complex tasks, you can ask the AI assistant to guide you step-by-step through creating configurations, setting up the backend, or troubleshooting deployment issues.
@@ -157,17 +158,17 @@ Currently, only `dimensions` with a list of the required/expected dimensions (fr
 
 ## Configuration Storage
 
-### Configuration Management Database (CMDB) with OpenAPI - Toaster
+### Configuration Management Database (CMDB) — IaCConsole API
 
-Toaster is an OpenAPI-powered Configuration Management Database with a web-based **Configuration Management Console** for centrally managing infrastructure configurations.
+IaCConsole API is an OpenAPI-powered Configuration Management Database with a web-based **IaCConsole Web UI** for centrally managing infrastructure configurations.
 
-You could set the env variable `toasterurl` to point to Toaster CMDB, like:
+You can set the env variable `toasterurl` to point to the IaCConsole API (CMDB), like:
 
 ```bash
 export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
 ```
 
-To generate your own credentials please go to [https://toaster.altuhov.su/](https://toaster.altuhov.su/), fill the form with Account Name, Email, and press `Create Account` and you will receive generated credentials and a ready-to-use export command like:
+To generate your own credentials please go to [https://iacconsole.com/](https://iacconsole.com/), fill the form with Account Name, Email, and press `Create Account` and you will receive generated credentials and a ready-to-use export command like:
 
 ```
 export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.altuhov.su
@@ -175,12 +176,12 @@ export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.alt
 
 <img width="500" alt="Screenshot_20250915_222318" src="https://github.com/user-attachments/assets/062848dc-e67d-48c6-adfe-9e1b9fddc7fd" />
 
-With the correct `toasterurl`, TofuGu will connect and receive all the required dimension data from Toaster CMDB.
+With the correct `toasterurl`, the CLI will connect and receive all the required dimension data from the IaCConsole API (CMDB).
 An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If Toaster CMDB does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
 
-**Toaster CMDB** provides additional features for your CI/CD pipelines:
+**IaCConsole API (CMDB)** provides additional features for your CI/CD pipelines:
 
-- **Configuration Management Console** - Web UI for managing configurations at [https://toaster.altuhov.su/console](https://toaster.altuhov.su/console)
+- **IaCConsole Web UI** - Visual console for managing configurations at [https://iacconsole.com/console](https://iacconsole.com/console)
 - **OpenAPI RESTful API** - Programmatic access to configuration data with full API documentation
 - **CI/CD Integration** - Fetch configurations directly in pipelines (e.g., [first-app.json](examples/inventory/demo-org/application/first-app.json) for validation)
 - **Dynamic Dropdowns** - Get dimension lists for [Jenkins drop-downs](examples/jenkins/README.md) to select deployment targets
@@ -190,13 +191,13 @@ An additional parameter could be passed to tofugu `-w workspacename`. In general
 **OpenAPI Documentation:**
 [Swagger API docs - Full RESTful API documentation and examples](https://app.swaggerhub.com/apis-docs/altuhovsu/tofugu_toaster_api/)
 
-To upload/update dimensions in Toaster from your Inventory Files repo you could use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh examples/inventory/`
+To upload/update dimensions to the IaCConsole API from your Inventory Files repo you can use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh examples/inventory/`
 
-Please join the [Toaster CMDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
+Please join the [IaCConsole beta-testers!](https://github.com/alt-dima/iacconsole-cli/issues/10)
 
 ### File-based Configuration Storage (Inventory Files)
 
-If the env variable `toasterurl` is not set, TofuGu will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
+If the env variable `toasterurl` is not set, the CLI will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
 
 Examples:
 
@@ -205,7 +206,7 @@ Examples:
 
 ### Dimensions usage in tf-code
 
-When you set dimensions in the tofugu flags `-d datacenter:staging1`, TofuGu will provide you inside tf-code next variables:
+When you set dimensions in the CLI flags `-d datacenter:staging1`, IaCConsole CLI will provide you inside tf-code the following variables:
 
 - var.tofugu_datacenter_name = will contain string `staging1`
 - var.tofugu_datacenter_data = will contain the whole object from `staging1.json`
@@ -243,7 +244,7 @@ Config file (in YAML format) path may be provided by the `--config` flag, for ex
 tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ```
 
-If the `--config` flag is not set, then it will try to load from the default location `$HOME/.tofugu`
+If the `--config` flag is not set, then it will try to load from the default location `$HOME/.tofugu` (current binary name remains `tofugu`).
 
 [.tofugu example](examples/.tofugu):
 
@@ -268,7 +269,7 @@ gcp-org:
 - `inventory_path` = relative path to the folder with JSONs
 - `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
 - `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$tofugu_state_path` will be replaced by the generated path.
-  For example, when you execute `tofugu cook ...... -- init`, TofuGu actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
+  For example, when you execute `tofugu cook ...... -- init`, IaCConsole CLI actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least
 
@@ -313,7 +314,7 @@ Examples:
 
 ## Remote state (Terraform Backend where state data files are stored)
 
-AWS, Google Cloud, and some other backends are supported! You could configure any backend provider in the [TofuGu Config file](#hometofugu)
+AWS, Google Cloud, and some other backends are supported! You can configure any backend provider in the [Config file](#hometofugu)
 
 [For AWS S3 your terraform code (`tofi`) should contain at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
 
@@ -341,7 +342,7 @@ This could be useful if you want to store by default tfstate for all the organiz
 
 To simplify "Data Source Configuration" (`data "terraform_remote_state" "tfstate" { }`) it will be nice to have backend config values as tfvars.
 
-`var.tofugu_backend_config` will contain all the parameters from [TofuGu config (backend Section)](#hometofugu)
+`var.tofugu_backend_config` will contain all the parameters from the [config (backend Section)](#hometofugu)
 
 [For example, for AWS S3](examples/tofies/demo-org/vpc/data.tf):
 
@@ -385,5 +386,5 @@ Do not forget to create the plugin-cache dir: `mkdir "$HOME/.terraform.d/plugin-
 
 ## License
 
-`tofugu` is licensed with Apache License Version 2.0.
+IaCConsole CLI is licensed with Apache License Version 2.0.
 Please read the LICENSE file for more details.

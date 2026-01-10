@@ -1,4 +1,4 @@
-module github.com/alt-dima/tofugu
+module github.com/alt-dima/iacconsole-cli
 
 go 1.25.0
 

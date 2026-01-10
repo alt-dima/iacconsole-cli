@@ -5,17 +5,17 @@ controller:
     configScripts:
       welcome-message: |
         jenkins:
-          systemMessage: "Jenkins For TofuGu Toaster Demo"
+          systemMessage: "Jenkins For IaCConsole Demo"
       pipeline-job: |
         jobs:
           - script: >
-              pipelineJob('tofugu-pipeline') {
+              pipelineJob('iacconsole-pipeline') {
                 definition {
                   cpsScm {
                     scm {
                       git {
                         remote {
-                          url('https://github.com/alt-dima/tofugu.git')
+                          url('https://github.com/alt-dima/iacconsole-cli.git')
                           credentials('')
                         }
                         branch('main')

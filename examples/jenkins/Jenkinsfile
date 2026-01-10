@@ -19,7 +19,7 @@ properties([
             import groovy.json.JsonSlurper
 
             try {
-                def url = new URL('https://toaster.altuhov.su/api/dimension/example-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
+                def url = new URL('https://api.iacconsole.com/v1/dimension/example-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
                 def connection = url.openConnection()
                 connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
                 connection.requestMethod = 'GET'
@@ -58,7 +58,7 @@ properties([
             import groovy.json.JsonSlurper
 
             try {
-                def url = new URL('https://toaster.altuhov.su/api/dimension/example-org/datacenter?workspace=master&fallbacktomaster=true&needdimdata=false')
+                def url = new URL('https://api.iacconsole.com/v1/dimension/example-org/datacenter?workspace=master&fallbacktomaster=true&needdimdata=false')
                 def connection = url.openConnection()
                 connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
                 connection.requestMethod = 'GET'
@@ -86,7 +86,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        git url: 'https://github.com/alt-dima/tofugu.git', branch: 'main'
+        git url: 'https://github.com/alt-dima/iacconsole-cli.git', branch: 'main'
         echo "Selected account: ${params.Account}"
         echo "Selected data center: ${params.DataCenter}"
       }
@@ -107,7 +107,7 @@ pipeline {
           sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
           sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz -C /tmp"
           
-          sh "curl -L -o tofugu_0.5.1_linux_${archSuffix}.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.1/tofugu_0.5.1_linux_${archSuffix}.tar.gz"
+          sh "curl -L -o tofugu_0.5.1_linux_${archSuffix}.tar.gz https://github.com/alt-dima/iacconsole-cli/releases/download/v0.5.1/iacconsole-cli_0.5.1_linux_${archSuffix}.tar.gz"
           sh "tar -xvf tofugu_0.5.1_linux_${archSuffix}.tar.gz"
         }
       }

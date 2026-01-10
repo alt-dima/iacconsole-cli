@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/alt-dima/tofugu/utils"
+	"github.com/alt-dima/iacconsole-cli/utils"
 	"github.com/spf13/cobra"
 )
 

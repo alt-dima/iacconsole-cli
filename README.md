@@ -165,13 +165,13 @@ IaCConsole API is an OpenAPI-powered Configuration Management Database with a we
 You can set the env variable `toasterurl` to point to the IaCConsole API (CMDB), like:
 
 ```bash
-export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
+export toasterurl='https://accountid:accountpass@api.iacconsole.com/v1'
 ```
 
 To generate your own credentials please go to [https://iacconsole.com/](https://iacconsole.com/), fill the form with Account Name, Email, and press `Create Account` and you will receive generated credentials and a ready-to-use export command like:
 
 ```
-export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.altuhov.su
+export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@api.iacconsole.com/v1
 ```
 
 <img width="500" alt="Screenshot_20250915_222318" src="https://github.com/user-attachments/assets/062848dc-e67d-48c6-adfe-9e1b9fddc7fd" />

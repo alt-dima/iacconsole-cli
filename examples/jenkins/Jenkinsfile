@@ -91,7 +91,7 @@ pipeline {
         echo "Selected data center: ${params.DataCenter}"
       }
     }
-    stage('Install OpenTofu and TofuGu') {
+    stage('Install OpenTofu and IacConsole CLI') {
       steps {
         script {
           def arch = sh(script: 'uname -m', returnStdout: true).trim()
@@ -107,8 +107,8 @@ pipeline {
           sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
           sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz -C /tmp"
           
-          sh "curl -L -o tofugu_0.5.1_linux_${archSuffix}.tar.gz https://github.com/alt-dima/iacconsole-cli/releases/download/v0.5.1/iacconsole-cli_0.5.1_linux_${archSuffix}.tar.gz"
-          sh "tar -xvf tofugu_0.5.1_linux_${archSuffix}.tar.gz"
+          sh "curl -L -o iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz https://github.com/alt-dima/iacconsole-cli/releases/download/v0.5.2/iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz"
         }
       }
     }
@@ -122,14 +122,14 @@ defaults:
 '''
       }
     }
-    stage('TofuGu Plan') {
+    stage('IaCConsole Plan') {
       environment {
-        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
+        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com/v1'
       }
       steps {
         ansiColor('xterm') {
-          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
-          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
+          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
+          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
         }
       }
     }
@@ -138,13 +138,13 @@ defaults:
         input 'Do you want to apply the changes?'
       }
     }
-    stage('TofuGu Apply') {
+    stage('IaCConsole Apply') {
       environment {
-        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
+        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com/v1'
       }
       steps {
         ansiColor('xterm') {
-          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- apply -auto-approve"
+          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- apply -auto-approve"
         }
       }
     }

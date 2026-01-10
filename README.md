@@ -1,11 +1,11 @@
-# Infrastructure layers configuration orchestrator for OpenTofu or Terraform
-`tofugu` is an infrastructure layers configuration orchestrator that dynamically manages OpenTofu or Terraform. It provides infrastructure configuration definitions from outside the Terraform code, using either files or an Infrastructure Layers Configuration Management Database (CMDB) called Toaster-ToasterDB. This allows you to reuse Terraform code across multiple environments instead of duplicating it.
+# Configuration Management for OpenTofu and Terraform
+`tofugu` is a configuration management CLI that dynamically orchestrates OpenTofu or Terraform deployments. It provides infrastructure configuration definitions from outside the Terraform code, using either files or a Configuration Management Database (CMDB) with an OpenAPI-powered interface called Toaster. This enables reusing Terraform code across multiple environments without duplication.
 
-- Environment/layer configuration stored outside the Terraform/OpenTofu code
+- Environment configuration stored outside the Terraform/OpenTofu code
 - Terraform/OpenTofu code, called **tofi**, should be generic enough to handle provided configuration to deploy the same resources with different configurations
 - `tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code (**tofi**) resulting in a full set of the Terraform code and configuration variables
 - After the temporary folder is ready, it executes `terraform` or `tofu` with specified parameters
-- Maintains separate state files for each environment/layer, automatically providing configuration for remote state management (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration + terraform) is stored in different `tfstate` files in remote storage (S3, GCS)
+- Maintains separate state files for each environment, automatically providing configuration for remote state management (different path on storage based on configured dimensions). So the deployed configuration is stored in different `tfstate` files in remote storage (S3, GCS)
 
 ## Quick start with Jenkins and demo configuration
 
@@ -19,7 +19,7 @@ For a full end-to-end example of using TofuGu in a CI/CD pipeline, see the pre-c
 
 1. [Download release](https://github.com/alt-dima/tofugu/releases) version >= 0.5.0
 2. Install [OpenTofu](https://opentofu.org/docs/intro/install/)
-3. Execute to generate simpe demo configuration with connection to demo account in [Infrastructure layers Configuration Management Database (CMDB). (Toaster-ToasterDB)](#infrastructure-layers-configuration-management-database-cmdb-toaster-toasterdb):
+3. Execute to generate simple demo configuration with connection to demo account in [Configuration Management Database (CMDB) with OpenAPI - Toaster](#configuration-management-database-cmdb-with-openapi---toaster):
 ```bash
 tofugu init
 ```
@@ -43,13 +43,13 @@ Getting started with `tofugu` is even easier using AI coding assistants:
 2. Ask questions like:
    - "How do I set up tofugu for AWS resources?"
    - "Help me create a new tofi for a GCP instance"
-   - "How do I use Toaster-ToasterDB with tofugu?"
+   - "How do I use Toaster CMDB with tofugu?"
    - "Show me how to pass environment variables to my terraform code"
 
 These instructions provide context about:
 - The architecture and key concepts of tofugu
 - How to work with tofies, dimensions, and inventory sources
-- Integration with Toaster-ToasterDB for centralized configuration
+- Integration with Toaster CMDB (OpenAPI-powered Configuration Management Console) for centralized configuration
 - Project-specific conventions and workflows
 
 For more complex tasks, you can ask the AI assistant to guide you step-by-step through creating configurations, setting up the backend, or troubleshooting deployment issues.
@@ -98,10 +98,13 @@ Currently, only `dimensions` with a list of the required/expected dimensions (fr
 
 [tofi_manifest.json example](examples/tofies/demo-org/vpc/tofi_manifest.json)
 
-## Infrastructure layers/dimensions configurations Storage
+## Configuration Storage
 
-### Infrastructure layers Configuration Management Database (CMDB). (Toaster-ToasterDB)
-You could set the env variable `toasterurl` to point to TofuGu-Toaster, like:
+### Configuration Management Database (CMDB) with OpenAPI - Toaster
+
+Toaster is an OpenAPI-powered Configuration Management Database with a web-based **Configuration Management Console** for centrally managing infrastructure configurations.
+
+You could set the env variable `toasterurl` to point to Toaster CMDB, like:
 ```bash
 export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
 ```
@@ -112,21 +115,25 @@ export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.alt
 ```
 <img width="500" alt="Screenshot_20250915_222318" src="https://github.com/user-attachments/assets/062848dc-e67d-48c6-adfe-9e1b9fddc7fd" />
 
-With the correct `toasterurl`, TofuGu will connect and receive all the required dimension data from the Toaster-ToasterDB.
-An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
+With the correct `toasterurl`, TofuGu will connect and receive all the required dimension data from Toaster CMDB.
+An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If Toaster CMDB does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
 
-**Toaster-ToasterDB** provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check the application configuration.
-Or you need a list of all the datacenters in the [datacenter dimension](examples/inventory/demo-org/datacenter) in a [Jenkins drop-down](examples/jenkins/README.md) list to select to which datacenter to deploy the application.
+**Toaster CMDB** provides additional features for your CI/CD pipelines:
+- **Configuration Management Console** - Web UI for managing configurations at [https://toaster.altuhov.su/console](https://toaster.altuhov.su/console)
+- **OpenAPI RESTful API** - Programmatic access to configuration data with full API documentation
+- **CI/CD Integration** - Fetch configurations directly in pipelines (e.g., [first-app.json](examples/inventory/demo-org/application/first-app.json) for validation)
+- **Dynamic Dropdowns** - Get dimension lists for [Jenkins drop-downs](examples/jenkins/README.md) to select deployment targets
 
 <img width="800" alt="Screenshot_20250915_222357" src="https://github.com/user-attachments/assets/735a4045-eb74-4fc0-b46d-aa01f655c7d0" />
 
-[Swagger API docs (full API documentation and examples)](https://app.swaggerhub.com/apis-docs/altuhovsu/tofugu_toaster_api/)
+**OpenAPI Documentation:**
+[Swagger API docs - Full RESTful API documentation and examples](https://app.swaggerhub.com/apis-docs/altuhovsu/tofugu_toaster_api/)
 
 To upload/update dimensions in Toaster from your Inventory Files repo you could use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh examples/inventory/`
 
-Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
+Please join the [Toaster CMDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
 
-### File-based Infrastructure layers configuration Storage. (Inventory Files)
+### File-based Configuration Storage (Inventory Files)
 
 If the env variable `toasterurl` is not set, TofuGu will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
 

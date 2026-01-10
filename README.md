@@ -5,8 +5,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alt-dima/tofugu)](https://goreportcard.com/report/github.com/alt-dima/tofugu)
 [![GitHub release](https://img.shields.io/github/v/release/alt-dima/tofugu)](https://github.com/alt-dima/tofugu/releases)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-blue)](https://golang.org/)
+[![Downloads](https://img.shields.io/github/downloads/alt-dima/tofugu/total)](https://github.com/alt-dima/tofugu/releases)
 
-`tofugu` is a configuration management CLI that dynamically orchestrates OpenTofu or Terraform deployments. It provides infrastructure configuration definitions from outside the Terraform code, using either files or a Configuration Management Database (CMDB) with an OpenAPI-powered interface called Toaster. This enables reusing Terraform code across multiple environments without duplication.
+`tofugu` is a configuration management CLI that dynamically orchestrates OpenTofu or Terraform deployments. It separates infrastructure configuration from code, enabling DevOps teams to reuse Terraform modules across multiple environments (dev, staging, production) without code duplication. Configuration can be sourced from files or a Configuration Management Database (CMDB) with an OpenAPI-powered interface called Toaster.
 
 ## Table of Contents
 

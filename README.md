@@ -189,7 +189,7 @@ An additional parameter could be passed to tofugu `-w workspacename`. In general
 <img width="800" alt="Screenshot_20250915_222357" src="https://github.com/user-attachments/assets/735a4045-eb74-4fc0-b46d-aa01f655c7d0" />
 
 **OpenAPI Documentation:**
-[Swagger API docs - Full RESTful API documentation and examples](https://app.swaggerhub.com/apis-docs/altuhovsu/tofugu_toaster_api/)
+[Swagger API docs - Full RESTful API documentation and examples](https://app.swaggerhub.com/apis-docs/altuhovsu/iacconsole-api/1.0.0)
 
 To upload/update dimensions to the IaCConsole API from your Inventory Files repo you can use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh examples/inventory/`
 

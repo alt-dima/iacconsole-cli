@@ -1,6 +1,6 @@
-# Pre-configured Jenkins for TofuGu and Tofugu Toaster Demo
+# Pre-configured Jenkins for IaCConsole-CLI IaCConsole-DB/API Demo
 
-This project provides a way to deploy a pre-configured Jenkins instance to any Kubernetes cluster (especially local ones like Kind or Minikube). It's designed to demonstrate an end-to-end workflow using TofuGu and Tofugu Toaster with a demo OpenTofu unit/tofie.
+This project provides a way to deploy a pre-configured Jenkins instance to any Kubernetes cluster (especially local ones like Kind or Minikube). It's designed to demonstrate an end-to-end workflow using IaCConsole-CLI and IaCConsole-DB with a demo OpenTofu unit.
 
 ## Steps to setup
 
@@ -23,11 +23,11 @@ This project provides a way to deploy a pre-configured Jenkins instance to any K
 
 5.  Log in with the username `admin` and the password obtained in step 2.
 
-6.  Go to the `tofugu-pipeline` job page: [http://127.0.0.1:8080/job/tofugu-pipeline/](http://127.0.0.1:8080/job/tofugu-pipeline/).
+6.  Go to the `iacconsole-pipeline` job page: [http://127.0.0.1:8080/job/iacconsole-pipeline/](http://127.0.0.1:8080/job/iacconsole-pipeline/).
 
 7.  On the left menu, click on **Build**. This will download and execute the `Jenkinsfile` from the repository.
 
-8.  Build #1 should start. Click on the build link to open the console output: [http://127.0.0.1:8080/job/tofugu-pipeline/1/console](http://127.0.0.1:8080/job/tofugu-pipeline/1/console).
+8.  Build #1 should start. Click on the build link to open the console output: [http://127.0.0.1:8080/job/iacconsole-pipeline/1/console](http://127.0.0.1:8080/job/iacconsole-pipeline/1/console).
 
 9.  Scroll to the end of the console output. You should see a plan output from OpenTofu and a question: "Do you want to apply the changes?".
 

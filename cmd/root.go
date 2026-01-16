@@ -14,9 +14,9 @@ var Verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "tofugu",
-	Short: "Tofies manager and generator for OpenTofu",
-	Long:  `Generates additinal vars files based on inventory and executes opentofu`,
+	Use:   "iacconsole-cli",
+	Short: "IaCConsole CLI wrapper for OpenTofu and Terraform",
+	Long:  `Generates additional vars files based on inventory and executes opentofu`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -41,7 +41,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tofugu)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.iacconsolerc)")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 
 	// Cobra also supports local flags, which will only run
@@ -50,11 +50,11 @@ func init() {
 }
 
 func initConfig() {
-	log.Println("TofuGu version:" + rootCmd.Version)
+	log.Println("version:" + rootCmd.Version)
 
 	viper.SetDefault("defaults.inventory_path", "examples/inventory")
 	viper.SetDefault("defaults.shared_modules_path", "")
-	viper.SetDefault("defaults.tofies_path", "examples/tofies")
+	viper.SetDefault("defaults.units_path", "examples/units")
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 
 	viper.SetConfigType("yaml")
@@ -69,15 +69,15 @@ func initConfig() {
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
-		viper.SetConfigName(".tofugu")
+		viper.SetConfigName(".iacconsolerc")
 	}
 
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		log.Println("TofuGu using config file:", viper.ConfigFileUsed())
+		log.Println("using config file:", viper.ConfigFileUsed())
 	} else {
 		log.Println(err.Error())
-		log.Println("TofuGu using default config with inventory in examples/inventory and tofies in examples/tofies")
+		log.Println("using default config with inventory in examples/inventory and units in examples/units")
 	}
 }

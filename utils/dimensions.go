@@ -5,16 +5,16 @@ import (
 	"strings"
 )
 
-func (tofuguStruct *Tofugu) ParseDimensions() {
-	parsedDimArgs := parseDimArgs(tofuguStruct.DimensionsFlags)
+func (s *State) ParseDimensions() {
+	parsedDimArgs := parseDimArgs(s.DimensionsFlags)
 
-	for _, dimension := range tofuguStruct.TofiManifest.Dimensions {
+	for _, dimension := range s.UnitManifest.Dimensions {
 		if _, ok := parsedDimArgs[dimension]; !ok {
 			log.Fatalln("dimension " + dimension + " not passed with -d arg")
 		}
 	}
 
-	tofuguStruct.ParsedDimensions = parsedDimArgs
+	s.ParsedDimensions = parsedDimArgs
 }
 
 func parseDimArgs(dimensionsArgs []string) map[string]string {

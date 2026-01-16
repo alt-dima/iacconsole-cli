@@ -1,31 +1,31 @@
 package utils
 
-type Tofugu struct {
-	TofiName          string
+type State struct {
+	UnitName          string
 	OrgName           string
 	DimensionsFlags   []string
-	TofiPath          string
+	UnitPath          string
 	SharedModulesPath string
 	InventoryPath     string
-	TofiManifestPath  string
+	UnitManifestPath  string
 	ParsedDimensions  map[string]string
 	CmdWorkTempDir    string
-	TofiManifest      tofiManifestStruct
+	UnitManifest      unitManifestStruct
 	StateS3Path       string
-	ToasterUrl        string
+	IacconsoleApiUrl  string
 	Workspace         string
 }
 
-type tofiManifestStruct struct {
+type unitManifestStruct struct {
 	Dimensions []string
 }
 
-type ToasterResponse struct {
+type IaCConsoleDBResponse struct {
 	Error      string
-	Dimensions []DimensionInToaster
+	Dimensions []DimensionInIaCConsoleDB
 }
 
-type DimensionInToaster struct {
+type DimensionInIaCConsoleDB struct {
 	ID        string
 	WorkSpace string
 	DimData   map[string]interface{}

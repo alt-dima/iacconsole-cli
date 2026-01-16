@@ -1,13 +1,13 @@
 defaults:
-  tofies_path: examples/tofies
-  shared_modules_path: examples/tofies/shared-modules
+  units_path: examples/units
+  shared_modules_path: examples/shared-modules
   inventory_path: examples/inventory
   cmd_to_exec: tofu
   backend:
     bucket: default-tfstates
-    key: $tofugu_state_path
+    key: $iacconsole_state_path
     region: us-east-2
 gcp-org:
   backend:
     bucket: gcp-tfstates
-    prefix: $tofugu_state_path
+    prefix: $iacconsole_state_path

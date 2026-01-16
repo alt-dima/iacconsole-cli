@@ -2,7 +2,7 @@
 
 inventory_path=$1
 
-post_to_toaster () {
+post_to_iacconsoledb () {
   # $1 - filename
 
   dimpath=$1
@@ -13,11 +13,11 @@ post_to_toaster () {
   curl --header "Content-Type: application/json" \
   --request POST \
   -d @$1\
-  "$toasterurl/api/dimension/$dimpath?workspace=master&source=inventory&readonly=true" -q
+  "$IACCONSOLE_API_URL/v1/dimension/$dimpath?workspace=master&source=inventory&readonly=true" -q
   printf "\n------------------------\n\n"
 }
 
 for file in $(find $inventory_path -name '*.json')
 do
-   post_to_toaster $file
+   post_to_iacconsoledb $file
 done

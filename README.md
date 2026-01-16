@@ -20,8 +20,8 @@ IaCConsole CLI is a configuration management tool that dynamically orchestrates 
 - [License](#license)
 
 - **Environment configuration stored outside the Terraform/OpenTofu code**
-- **Terraform/OpenTofu code, called "tofi", should be generic enough to handle provided configuration to deploy the same resources with different configurations**
-- **`tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code ("tofi") resulting in a full set of the Terraform code and configuration variables**
+- **Terraform/OpenTofu code, called "unit", should be generic enough to handle provided configuration to deploy the same resources with different configurations**
+- **`tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code ("unit") resulting in a full set of the Terraform code and configuration variables**
 - **After the temporary folder is ready, it executes `terraform` or `tofu` with specified parameters**
 - **Maintains separate state files for each environment, automatically providing configuration for remote state management (different path on storage based on configured dimensions). So the deployed configuration is stored in different `tfstate` files in remote storage (S3, GCS)**
 
@@ -47,15 +47,15 @@ For a full end-to-end example of using IaCConsole CLI in a CI/CD pipeline, see t
 
 1. Download the latest release from [GitHub Releases](https://github.com/alt-dima/iacconsole-cli/releases) (version >= 0.5.0)
 2. Extract the binary for your platform (Linux/macOS)
-3. Make it executable: `chmod +x tofugu`
-4. Move to your PATH: `sudo mv tofugu /usr/local/bin/`
+3. Make it executable: `chmod +x iacconsole-cli`
+4. Move to your PATH: `sudo mv iacconsole-cli /usr/local/bin/`
 
 ### Build from Source
 
 ```bash
 git clone https://github.com/alt-dima/iacconsole-cli.git
 cd iacconsole-cli
-go build -o bin/tofugu .
+go build -o bin/iacconsole-cli .
 ```
 
 ### Prerequisites
@@ -69,13 +69,13 @@ go build -o bin/tofugu .
 3. Execute to generate simple demo configuration with connection to demo account in the [IaCConsole API (CMDB)](#configuration-management-database-cmdb---iacconsole-api):
 
 ```bash
-tofugu init
+iacconsole-cli init
 ```
 
 To generate with [file based inventory](#file-based-infrastructure-layers-configuration-storage-inventory-files):
 
 ```bash
-tofugu init --toaster=false
+iacconsole-cli init --iacconsole-db=false
 ```
 
 4. Follow on-screen instructions
@@ -95,14 +95,14 @@ Getting started with IaCConsole CLI is even easier using AI coding assistants:
 2. Ask questions like:
 
 - "How do I set up IaCConsole for AWS resources?"
-- "Help me create a new tofi for a GCP instance"
+- "Help me create a new unit for a GCP instance"
 - "How do I use the IaCConsole API (CMDB)?"
 - "Show me how to pass environment variables to my terraform code"
 
 These instructions provide context about:
 
 - The architecture and key concepts of IaCConsole CLI
-- How to work with tofies, dimensions, and inventory sources
+- How to work with units, dimensions, and inventory sources
 - Integration with the IaCConsole API (CMDB) and IaCConsole Web UI for centralized configuration
 - Project-specific conventions and workflows
 
@@ -129,32 +129,32 @@ So why another tool?
 Organization with AWS resources and state stored in S3
 
 ```bash
-./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
-./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
-./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
+./iacconsole-cli exec --config examples/.iacconsolerc -o demo-org -d account:test-account -d datacenter:staging1 -u vpc -- init
+./iacconsole-cli exec --config examples/.iacconsolerc -o demo-org -d account:test-account -d datacenter:staging1 -u vpc -- plan
+./iacconsole-cli exec --config examples/.iacconsolerc -o demo-org -d account:test-account -d datacenter:staging1 -u vpc -- apply
 ```
 
 Organization with Google Cloud resources and state stored in Google Cloud Storage
 
 ```bash
-./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- init
-./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- plan
-./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- apply
+./iacconsole-cli exec --config examples/.iacconsolerc -o gcp-org -d account:free-tier -u free_instance -- init
+./iacconsole-cli exec --config examples/.iacconsolerc -o gcp-org -d account:free-tier -u free_instance -- plan
+./iacconsole-cli exec --config examples/.iacconsolerc -o gcp-org -d account:free-tier -u free_instance -- apply
 ```
 
 - Everything after `--` will be passed as parameters to the `cmd_to_exec`
-- `-c` = to remove temp dir after any `tofugu` execution (after `apply` or `destroy` and exit code=0 temp dir removed automatically)
-- `-o` = name of the `organization` (subfolder in **Inventory**, **tofies** folders and in `.tofugu` config section)
+- `-c` = to remove temp dir after any `iacconsole-cli` execution (after `apply` or `destroy` and exit code=0 temp dir removed automatically)
+- `-o` = name of the `organization` (subfolder in **Inventory**, **units** folders and in `.iacconsolerc` config section)
 - `-d` = `dimension` to attach to tofu/terraform. You may specify as many `-d` pairs as you need!
-- `-t` = name of the `tofi` in the `tofies` folder
+- `-t` = name of the `unit` in the `units` folder
 
-## Tofi Manifest
+## unit Manifest
 
-Special JSON file with the name `tofi_manifest.json` in the `tofi` folder provides options for TofuGu.
+Special JSON file with the name `unit_manifest.json` in the `unit` folder provides options for iacconsole-cli.
 
 Currently, only `dimensions` with a list of the required/expected dimensions (from **Inventory Store**)
 
-[tofi_manifest.json example](examples/tofies/demo-org/vpc/tofi_manifest.json)
+[unit_manifest.json example](examples/units/demo-org/vpc/unit_manifest.json)
 
 ## Configuration Storage
 
@@ -162,22 +162,22 @@ Currently, only `dimensions` with a list of the required/expected dimensions (fr
 
 IaCConsole API is an OpenAPI-powered Configuration Management Database with a web-based **IaCConsole Web UI** for centrally managing infrastructure configurations.
 
-You can set the env variable `toasterurl` to point to the IaCConsole API (CMDB), like:
+You can set the env variable `iacconsole_api_url` to point to the IaCConsole API (CMDB), like:
 
 ```bash
-export toasterurl='https://accountid:accountpass@api.iacconsole.com/v1'
+export IACCONSOLE_API_URL='https://accountid:accountpass@api.iacconsole.com'
 ```
 
 To generate your own credentials please go to [https://iacconsole.com/](https://iacconsole.com/), fill the form with Account Name, Email, and press `Create Account` and you will receive generated credentials and a ready-to-use export command like:
 
 ```
-export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@api.iacconsole.com/v1
+export IACCONSOLE_API_URL=https://6634b72292e9e996105de19e:generatedpassword@api.iacconsole.com
 ```
 
 <img width="500" alt="Screenshot_20250915_222318" src="https://github.com/user-attachments/assets/062848dc-e67d-48c6-adfe-9e1b9fddc7fd" />
 
-With the correct `toasterurl`, the CLI will connect and receive all the required dimension data from the IaCConsole API (CMDB).
-An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If Toaster CMDB does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
+With the correct `IACCONSOLE_API_URL`, the CLI will connect and receive all the required dimension data from the IaCConsole API (CMDB).
+An additional parameter could be passed to iacconsole-cli `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If Toaster CMDB does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
 
 **IaCConsole API (CMDB)** provides additional features for your CI/CD pipelines:
 
@@ -197,7 +197,7 @@ Please join the [IaCConsole beta-testers!](https://github.com/alt-dima/iacconsol
 
 ### File-based Configuration Storage (Inventory Files)
 
-If the env variable `toasterurl` is not set, the CLI will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
+If the env variable `IACCONSOLE_API_URL` is not set, the CLI will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
 
 Examples:
 
@@ -208,68 +208,68 @@ Examples:
 
 When you set dimensions in the CLI flags `-d datacenter:staging1`, IaCConsole CLI will provide you inside tf-code the following variables:
 
-- var.tofugu_datacenter_name = will contain string `staging1`
-- var.tofugu_datacenter_data = will contain the whole object from `staging1.json`
-- var.tofugu_datacenter_defaults = will contain the whole object from `dim_defaults.json` IF the file `dim_defaults.json` exists!
+- var.iacconsolerc_datacenter_name = will contain string `staging1`
+- var.iacconsolerc_datacenter_data = will contain the whole object from `staging1.json`
+- var.iacconsolerc_datacenter_defaults = will contain the whole object from `dim_defaults.json` IF the file `dim_defaults.json` exists!
 
 Examples:
 
-- [datacenter object with defaults used in tf-code](examples/tofies/demo-org/vpc/main.tf#L5)
+- [datacenter object with defaults used in tf-code](examples/units/demo-org/vpc/main.tf#L5)
 
 ## Passing environment variables from shell
 
 For example, you need to pass a variable (AWS region) from shell to the terraform code, simply set it and use it!
 
-**Environment variable must start with `tofugu_envvar_` prefix!**
+**Environment variable must start with `iacconsole-cli_envvar_` prefix!**
 
 ```bash
-export tofugu_envvar_awsregion=us-east-1
+export iacconsole-cli_envvar_awsregion=us-east-1
 ```
 
 In the TF code:
 
 ```
 provider "aws" {
-    region = var.tofugu_envvar_awsregion
+    region = var.iacconsolerc_envvar_awsregion
 }
 ```
 
-[Env variables used in code example](examples/tofies/demo-org/vpc/providers.tf#L3)
+[Env variables used in code example](examples/units/demo-org/vpc/providers.tf#L3)
 
-## $HOME/.tofugu
+## $HOME/.iacconsolerc
 
 Config file (in YAML format) path may be provided by the `--config` flag, for example:
 
 ```bash
-tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
+iacconsole-cli --config path_to_config/iacconsole-cliconfig exec -o demo-org -d account:test-account -d datacenter:staging1 -u vpc -- init
 ```
 
-If the `--config` flag is not set, then it will try to load from the default location `$HOME/.tofugu` (current binary name remains `tofugu`).
+If the `--config` flag is not set, then it will try to load from the default location `$HOME/.iacconsolerc` (current binary name remains `iacconsole-cli`).
 
-[.tofugu example](examples/.tofugu):
+[.iacconsolerc example](examples/.iacconsolerc):
 
 ```yaml
 defaults:
-  tofies_path: examples/tofies
-  shared_modules_path: examples/tofies/shared-modules
+  units_path: examples/units
+  shared_modules_path: examples/units/shared-modules
   inventory_path: examples/inventory
   cmd_to_exec: tofu
   backend:
     bucket: default-tfstates
-    key: $tofugu_state_path
+    key: $iacconsole-cli_state_path
     region: us-east-2
 gcp-org:
   backend:
     bucket: gcp-tfstates
-    prefix: $tofugu_state_path
+    prefix: $iacconsole-cli_state_path
 ```
 
-- `tofies_path` = relative path to the folder with terraform code (`tofi`)
-- `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
+- `units_path` = relative path to the folder with terraform code (`unit`)
+- `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `unit`
 - `inventory_path` = relative path to the folder with JSONs
 - `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
-- `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$tofugu_state_path` will be replaced by the generated path.
-  For example, when you execute `tofugu cook ...... -- init`, IaCConsole CLI actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
+- `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$iacconsole-cli_state_path` will be replaced by the generated path.
+  For example, when you execute `iacconsole-cli exec ...... -- init`, IaCConsole CLI actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least
 
@@ -277,7 +277,7 @@ At least
 defaults:
   backend:
     bucket: default-tfstates
-    key: $tofugu_state_path
+    key: $iacconsole-cli_state_path
 ```
 
 must be set in the config file! With key:values specific for the backend provider being used in org!
@@ -288,15 +288,15 @@ Other options contain hard-coded defaults:
 defaults:
   inventory_path: "examples/inventory"
   shared_modules_path: ""
-  tofies_path: "examples/tofies"
+  units_path: "examples/units"
   cmd_to_exec: "tofu"
 ```
 
 ## Shared modules support
 
-It is a good practice to move some generic terraform code to the `modules` and reuse those modules in multiple terraform code (**tofies**)
+It is a good practice to move some generic terraform code to the `modules` and reuse those modules in multiple terraform code (**units**)
 
-Path to the folder with such private shared modules is configured by the `shared_modules_path` parameter in the `.tofugu` configuration file.
+Path to the folder with such private shared modules is configured by the `shared_modules_path` parameter in the `.iacconsolerc` configuration file.
 
 This folder will be mounted/linked to every temporary folder (set) so you could use any module by short path like
 
@@ -309,14 +309,14 @@ module "vpc" {
 
 Examples:
 
-- [Shared module for VPC creation](examples/tofies/shared-modules/create_vpc)
-- [Shared module for VPC creation used in code](examples/tofies/demo-org/vpc/main.tf#L3)
+- [Shared module for VPC creation](examples/units/shared-modules/create_vpc)
+- [Shared module for VPC creation used in code](examples/units/demo-org/vpc/main.tf#L3)
 
 ## Remote state (Terraform Backend where state data files are stored)
 
-AWS, Google Cloud, and some other backends are supported! You can configure any backend provider in the [Config file](#hometofugu)
+AWS, Google Cloud, and some other backends are supported! You can configure any backend provider in the [Config file](#homeiacconsole-cli)
 
-[For AWS S3 your terraform code (`tofi`) should contain at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
+[For AWS S3 your terraform code (`unit`) should contain at least:](examples/units/demo-org/vpc/versions.tf#L4):
 
 ```
 terraform {
@@ -324,7 +324,7 @@ terraform {
 }
 ```
 
-[For Google Cloud Storage your terraform code (`tofi`) should contain at least:](examples/tofies/gcp-org/free_instance/versions.tf#L4):
+[For Google Cloud Storage your terraform code (`unit`) should contain at least:](examples/units/gcp-org/free_instance/versions.tf#L4):
 
 ```
 terraform {
@@ -332,9 +332,9 @@ terraform {
 }
 ```
 
-If for the `demo-org` config `bucket` is set, then `$tofugu_state_path` will be like: `dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
+If for the `demo-org` config `bucket` is set, then `$iacconsole-cli_state_path` will be like: `dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
 
-If for the `demo-org` config `bucket` is NOT set, then `$tofugu_state_path` will be like `org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
+If for the `demo-org` config `bucket` is NOT set, then `$iacconsole-cli_state_path` will be like `org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
 
 This could be useful if you want to store by default tfstate for all the organizations in the same/default bucket `default-tfstates` but for some specific organization you need to store tfstates in a dedicated bucket `demo-org-tfstates`
 
@@ -342,34 +342,34 @@ This could be useful if you want to store by default tfstate for all the organiz
 
 To simplify "Data Source Configuration" (`data "terraform_remote_state" "tfstate" { }`) it will be nice to have backend config values as tfvars.
 
-`var.tofugu_backend_config` will contain all the parameters from the [config (backend Section)](#hometofugu)
+`var.iacconsolerc_backend_config` will contain all the parameters from the [config (backend Section)](#homeiacconsole-cli)
 
-[For example, for AWS S3](examples/tofies/demo-org/vpc/data.tf):
+[For example, for AWS S3](examples/units/demo-org/vpc/data.tf):
 
 ```
 data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
-    bucket = var.tofugu_backend_config.bucket
+    bucket = var.iacconsolerc_backend_config.bucket
     key    = "network/terraform.tfstate"
-    region = var.tofugu_backend_config.region
+    region = var.iacconsolerc_backend_config.region
   }
 }
 ```
 
-[And for GCS](examples/tofies/gcp-org/free_instance/data.tf):
+[And for GCS](examples/units/gcp-org/free_instance/data.tf):
 
 ```
 data "terraform_remote_state" "free_instance" {
   backend = "gcs"
   config = {
-    bucket  = var.tofugu_backend_config.bucket
+    bucket  = var.iacconsolerc_backend_config.bucket
     prefix  = "account_free-tier/free_instance.tfstate"
   }
 }
 ```
 
-You will set `key/prefix` to another tofie's tfstate, which outputs you want to use.
+You will set `key/prefix` to another unite's tfstate, which outputs you want to use.
 
 ## $HOME/.tofurc
 

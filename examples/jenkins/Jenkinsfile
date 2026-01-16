@@ -107,16 +107,16 @@ pipeline {
           sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
           sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz -C /tmp"
           
-          sh "curl -L -o iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz https://github.com/alt-dima/iacconsole-cli/releases/download/v0.5.2/iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz"
-          sh "tar -xvf iacconsole-cli_0.5.2_linux_${archSuffix}.tar.gz"
+          sh "curl -L -o iacconsole-cli_0.6.0_linux_${archSuffix}.tar.gz https://github.com/alt-dima/iacconsole-cli/releases/download/v0.6.0/iacconsole-cli_0.6.0_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf iacconsole-cli_0.6.0_linux_${archSuffix}.tar.gz"
         }
       }
     }
-    stage('Create .tofugu config') {
+    stage('Create .iacconsolerc config') {
       steps {
-        writeFile file: '.tofugu', text: '''
+        writeFile file: '.iacconsolerc', text: '''
 defaults:
-  tofies_path: examples/tofies
+  units_path: examples/units
   inventory_path: examples/inventory
   cmd_to_exec: /tmp/tofu
 '''
@@ -124,12 +124,12 @@ defaults:
     }
     stage('IaCConsole Plan') {
       environment {
-        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com/v1'
+        IACCONSOLE_API_URL = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com'
       }
       steps {
         ansiColor('xterm') {
-          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
-          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
+          sh "./iacconsole-cli exec -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -u demo -- init"
+          sh "./iacconsole-cli exec -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -u demo -- plan"
         }
       }
     }
@@ -140,11 +140,11 @@ defaults:
     }
     stage('IaCConsole Apply') {
       environment {
-        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com/v1'
+        IACCONSOLE_API_URL = 'https://662cab7c5e116819738b01fe:supertoaster@api.iacconsole.com'
       }
       steps {
         ansiColor('xterm') {
-          sh "./iacconsole-cli cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- apply -auto-approve"
+          sh "./iacconsole-cli exec -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -u demo -- apply -auto-approve"
         }
       }
     }

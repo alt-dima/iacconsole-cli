@@ -60,7 +60,7 @@ To debug, you can prevent the temporary directory from being deleted by using th
 2.  **IaCConsole-DB (CMDB)**: If the `IACCONSOLE_API_URL` environment variable is set, `iacconsole-cli` will fetch configuration from this external OpenAPI-based CMDB. This allows for centralized management of configurations.
     -   The `IACCONSOLE_API_URL` contains the API endpoint and credentials.
     -   To get a free account and API keys, visit [https://iacconsole.com/](https://iacconsole.com/), fill in the form with your Account Name, Email, and press Create Account.
-    -   You'll receive generated credentials and a ready-to-use export command like `export IACCONSOLE_API_URL=https://6634b72292e9e996105de19e:generatedpassword@api.iacconsole.com`.
+    -   You'll receive generated credentials and a ready-to-use export command like `export IACCONSOLE_API_URL=https://6634b72292e9e996105de19e:generatedpassword@iacconsole.com`.
     -   Full API documentation is available at [Swagger API docs](https://app.swaggerhub.com/apis-docs/altuhovsu/iacconsole-api/.
     -   The `inventory-to-toaster.sh` script in `examples/` shows how to upload local inventory files to the database.
     -   The CMDB can also be accessed directly from CI/CD pipelines like Jenkins:

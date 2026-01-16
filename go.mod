@@ -1,10 +1,10 @@
 module github.com/alt-dima/iacconsole-cli
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/otiai10/copy v1.14.1
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 )
 

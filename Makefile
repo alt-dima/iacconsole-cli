@@ -3,7 +3,7 @@ VERSION_STRING := $(shell git rev-parse --short HEAD)
 endif
 
 BINDIR    := $(CURDIR)/bin
-PLATFORMS := linux/amd64/tofugu-Linux-x86_64/osusergo*netgo*static_build darwin/amd64/tofugu-Darwin-x86_64/osusergo*netgo*static_build linux/arm64/tofugu-Linux-arm64/osusergo*netgo*static_build darwin/arm64/tofugu-Darwin-arm64/osusergo*netgo*static_build
+PLATFORMS := linux/amd64/iacconsole-cli-Linux-x86_64/osusergo*netgo*static_build darwin/amd64/iacconsole-cli-Darwin-x86_64/osusergo*netgo*static_build linux/arm64/iacconsole-cli-Linux-arm64/osusergo*netgo*static_build darwin/arm64/iacconsole-cli-Darwin-arm64/osusergo*netgo*static_build
 BUILDCOMMAND := go build -trimpath -ldflags "-s -w -X main.version=${VERSION_STRING}"
 temp = $(subst /, ,$@)
 os = $(word 1, $(temp))
@@ -32,7 +32,7 @@ latest:
 
 .PHONY: build
 build:
-	$(BUILDCOMMAND) -o ${BINDIR}/tofugu
+	$(BUILDCOMMAND) -o ${BINDIR}/iacconsole-cli
 
 .PHONY: dep
 dep:

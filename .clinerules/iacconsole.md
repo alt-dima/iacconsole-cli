@@ -86,8 +86,8 @@ println(toasterDimValuesRequest("account"))    // Returns [test-account]
 
 - **Go Code**: The Go code is straightforward and follows standard practices. The core logic involves file system operations (`os`, `path/filepath`), JSON parsing (`encoding/json`), and command execution (`os/exec`).
 - **Variable Injection**: `iacconsole-cli` injects variables into the Terraform context:
-  - For a dimension `-d datacenter:staging1`, it creates `var.iacconsolerc_datacenter_name`, `var.iacconsolerc_datacenter_data`, and `var.iacconsolerc_datacenter_defaults`.
-  - Environment variables prefixed with `iacconsole-cli_envvar_` (e.g., `export iacconsole-cli_envvar_aws_region=us-east-1`) are available in Terraform as `var.iacconsolerc_envvar_aws_region`.
+  - For a dimension `-d datacenter:staging1`, it creates `var.iacconsole_datacenter_name`, `var.iacconsole_datacenter_data`, and `var.iacconsole_datacenter_defaults`.
+  - Environment variables prefixed with `iacconsole-cli_envvar_` (e.g., `export iacconsole-cli_envvar_aws_region=us-east-1`) are available in Terraform as `var.iacconsole_envvar_aws_region`.
 - **Configuration Files**:
   - `unit_manifest.json` inside a unit directory can declare required dimensions.
   - `dim_defaults.json` inside an inventory dimension directory provides default values for all items in that dimension.

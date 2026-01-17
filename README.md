@@ -208,9 +208,9 @@ Examples:
 
 When you set dimensions in the CLI flags `-d datacenter:staging1`, IaCConsole CLI will provide you inside tf-code the following variables:
 
-- var.iacconsolerc_datacenter_name = will contain string `staging1`
-- var.iacconsolerc_datacenter_data = will contain the whole object from `staging1.json`
-- var.iacconsolerc_datacenter_defaults = will contain the whole object from `dim_defaults.json` IF the file `dim_defaults.json` exists!
+- var.iacconsole_datacenter_name = will contain string `staging1`
+- var.iacconsole_datacenter_data = will contain the whole object from `staging1.json`
+- var.iacconsole_datacenter_defaults = will contain the whole object from `dim_defaults.json` IF the file `dim_defaults.json` exists!
 
 Examples:
 
@@ -230,7 +230,7 @@ In the TF code:
 
 ```
 provider "aws" {
-    region = var.iacconsolerc_envvar_awsregion
+    region = var.iacconsole_envvar_awsregion
 }
 ```
 
@@ -342,7 +342,7 @@ This could be useful if you want to store by default tfstate for all the organiz
 
 To simplify "Data Source Configuration" (`data "terraform_remote_state" "tfstate" { }`) it will be nice to have backend config values as tfvars.
 
-`var.iacconsolerc_backend_config` will contain all the parameters from the [config (backend Section)](#homeiacconsole-cli)
+`var.iacconsole_backend_config` will contain all the parameters from the [config (backend Section)](#homeiacconsole-cli)
 
 [For example, for AWS S3](examples/units/demo-org/vpc/data.tf):
 
@@ -350,9 +350,9 @@ To simplify "Data Source Configuration" (`data "terraform_remote_state" "tfstate
 data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
-    bucket = var.iacconsolerc_backend_config.bucket
+    bucket = var.iacconsole_backend_config.bucket
     key    = "network/terraform.tfstate"
-    region = var.iacconsolerc_backend_config.region
+    region = var.iacconsole_backend_config.region
   }
 }
 ```
@@ -363,7 +363,7 @@ data "terraform_remote_state" "network" {
 data "terraform_remote_state" "free_instance" {
   backend = "gcs"
   config = {
-    bucket  = var.iacconsolerc_backend_config.bucket
+    bucket  = var.iacconsole_backend_config.bucket
     prefix  = "account_free-tier/free_instance.tfstate"
   }
 }

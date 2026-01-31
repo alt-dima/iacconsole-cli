@@ -256,19 +256,19 @@ defaults:
   cmd_to_exec: tofu
   backend:
     bucket: default-tfstates
-    key: $iacconsole-cli_state_path
+    key: $iacconsole_state_path
     region: us-east-2
 gcp-org:
   backend:
     bucket: gcp-tfstates
-    prefix: $iacconsole-cli_state_path
+    prefix: $iacconsole_state_path
 ```
 
 - `units_path` = relative path to the folder with terraform code (`unit`)
 - `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `unit`
 - `inventory_path` = relative path to the folder with JSONs
 - `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
-- `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$iacconsole-cli_state_path` will be replaced by the generated path.
+- `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$iacconsole_state_path` will be replaced by the generated path.
   For example, when you execute `iacconsole-cli exec ...... -- init`, IaCConsole CLI actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least
@@ -277,7 +277,7 @@ At least
 defaults:
   backend:
     bucket: default-tfstates
-    key: $iacconsole-cli_state_path
+    key: $iacconsole_state_path
 ```
 
 must be set in the config file! With key:values specific for the backend provider being used in org!
@@ -332,9 +332,9 @@ terraform {
 }
 ```
 
-If for the `demo-org` config `bucket` is set, then `$iacconsole-cli_state_path` will be like: `dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
+If for the `demo-org` config `bucket` is set, then `$iacconsole_state_path` will be like: `dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
 
-If for the `demo-org` config `bucket` is NOT set, then `$iacconsole-cli_state_path` will be like `org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
+If for the `demo-org` config `bucket` is NOT set, then `$iacconsole_state_path` will be like `org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/unitName.tfstate`
 
 This could be useful if you want to store by default tfstate for all the organizations in the same/default bucket `default-tfstates` but for some specific organization you need to store tfstates in a dedicated bucket `demo-org-tfstates`
 

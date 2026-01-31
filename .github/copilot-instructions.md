@@ -91,4 +91,4 @@ println(toasterDimValuesRequest("account"))    // Returns [test-account]
 - **Configuration Files**:
   - `unit_manifest.json` inside a unit directory can declare required dimensions.
   - `dim_defaults.json` inside an inventory dimension directory provides default values for all items in that dimension.
-- **Backend State**: Remote state configuration is managed via the `.iacconsolerc` config file. The state path (`$iacconsole-cli_state_path`) is dynamically generated based on the organization and dimensions to ensure state isolation.
+- **Backend State**: Remote state configuration is managed via the `.iacconsolerc` config file. The state path (`$iacconsole_state_path`) is dynamically generated based on the organization and dimensions to ensure state isolation.

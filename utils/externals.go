@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -59,7 +60,7 @@ func (s *State) SetupBackendConfig() map[string]interface{} {
 	return backendConfigMap
 }
 
-func (s *State) GetDimData(dimensionKey string, dimensionValue string, skipOnNotFound bool) map[string]interface{} {
+func (s *State) GetDimData(dimensionKey string, dimensionValue string, skipOnNotFound bool) (map[string]interface{}, error) {
 	var dimensionJsonMap map[string]interface{}
 
 	if s.IacconsoleApiUrl == "" {
@@ -68,46 +69,49 @@ func (s *State) GetDimData(dimensionKey string, dimensionValue string, skipOnNot
 		if err != nil {
 			if os.IsNotExist(err) && skipOnNotFound {
 				log.Println("inventory files: Optional dimension " + s.OrgName + "/" + dimensionKey + "/" + dimensionValue + " not found, skipping")
-				return dimensionJsonMap
+				return dimensionJsonMap, nil
 			}
-			log.Fatal("inventory files: error when opening dim file: ", err.Error())
+			return nil, err
 		}
 		err = json.Unmarshal(dimensionJsonBytes, &dimensionJsonMap)
 		if err != nil {
-			log.Fatal("error during Unmarshal(): ", err)
+			return nil, err
 		}
 	} else {
 		resp, err := http.Get(s.IacconsoleApiUrl + "/v1/dimension/" + s.OrgName + "/" + dimensionKey + "/" + dimensionValue + "?workspace=" + s.Workspace + "&fallbacktomaster=true")
 		if err != nil {
-			log.Fatalf("request failed: %s", err)
-		} else if resp.StatusCode == 404 {
+			return nil, err
+		}
+
+		if resp.StatusCode == 404 {
 			resp.Body.Close()
 			if skipOnNotFound {
 				log.Println("optional dimension " + s.OrgName + "/" + dimensionKey + "/" + dimensionValue + " not found, skipping")
-				return dimensionJsonMap
-			} else {
-				log.Println("requested dimension not found response 404:" + resp.Request.URL.String())
-				log.Fatalln("dimension " + s.OrgName + "/" + dimensionKey + "/" + dimensionValue + " not found")
+				return dimensionJsonMap, nil
 			}
-		} else if resp.StatusCode != 200 {
+			log.Println("requested dimension not found response 404:" + resp.Request.URL.String())
+			return nil, fmt.Errorf("dimension %s/%s/%s not found", s.OrgName, dimensionKey, dimensionValue)
+		}
+
+		if resp.StatusCode != 200 {
 			resp.Body.Close()
-			log.Fatalf("request "+s.OrgName+"/"+dimensionKey+"/"+dimensionValue+"?workspace="+s.Workspace+" failed with response: %v", resp.StatusCode)
+			return nil, fmt.Errorf("request %s/%s/%s?workspace=%s failed with response: %v", s.OrgName, dimensionKey, dimensionValue, s.Workspace, resp.StatusCode)
 		}
 		defer resp.Body.Close()
 
 		dimensionJsonBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("reading body response failed: %s", err)
+			return nil, fmt.Errorf("reading body response failed: %s", err)
 		}
 
 		var IacConsoleDBResponse IaCConsoleDBResponse
 		err = json.Unmarshal(dimensionJsonBytes, &IacConsoleDBResponse)
 		if err != nil {
-			log.Fatal("error during unmarshal json response: ", err)
+			return nil, fmt.Errorf("error during unmarshal json response: %v", err)
 		}
 
 		if len(IacConsoleDBResponse.Dimensions) != 1 {
-			log.Fatalf("should be only one dimension in response")
+			return nil, fmt.Errorf("should be only one dimension in response")
 		}
 		if IacConsoleDBResponse.Error != "" {
 			log.Println(IacConsoleDBResponse.Error)
@@ -116,5 +120,5 @@ func (s *State) GetDimData(dimensionKey string, dimensionValue string, skipOnNot
 
 	}
 
-	return dimensionJsonMap
+	return dimensionJsonMap, nil
 }

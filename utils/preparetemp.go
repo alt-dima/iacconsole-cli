@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -8,9 +9,9 @@ import (
 	"github.com/otiai10/copy"
 )
 
-func (s *State) PrepareTemp() {
+func (s *State) PrepareTemp() error {
 	if s.StateS3Path == "" {
-		log.Fatalf("StateS3Path is empty \n")
+		return fmt.Errorf("StateS3Path is empty")
 	}
 
 	tmpFolderNameSuffix := s.OrgName + s.StateS3Path + s.UnitName
@@ -18,7 +19,7 @@ func (s *State) PrepareTemp() {
 
 	// Create temp directory if it doesn't exist
 	if err := os.MkdirAll(cmdTempDirFullPath, 0755); err != nil {
-		log.Fatalf("failed to create temp directory: %v\n", err)
+		return fmt.Errorf("failed to create temp directory: %v", err)
 	}
 
 	// Copy options to exclude certain files/directories
@@ -32,7 +33,7 @@ func (s *State) PrepareTemp() {
 	// Copy the unit directory to temp directory
 	if err := copy.Copy(s.UnitPath, cmdTempDirFullPath, opt); err != nil {
 		os.RemoveAll(cmdTempDirFullPath)
-		log.Fatalf("failed to copy unit to tempdir: %v\n", err)
+		return fmt.Errorf("failed to copy unit to tempdir: %v", err)
 	}
 
 	if s.SharedModulesPath != "" {
@@ -43,11 +44,12 @@ func (s *State) PrepareTemp() {
 		// Create new symlink
 		if err := os.Symlink(s.SharedModulesPath, sharedModulesLink); err != nil {
 			os.RemoveAll(cmdTempDirFullPath)
-			log.Fatalf("failed to create symlink for shared_modules: %v\n", err)
+			return fmt.Errorf("failed to create symlink for shared_modules: %v", err)
 		}
 		log.Println("iacconsole symlinked shared_modules to tempdir : " + s.SharedModulesPath)
 	}
 
 	s.CmdWorkTempDir = cmdTempDirFullPath
 	log.Println("iacconsole prepared unit in temp dir: " + s.CmdWorkTempDir)
+	return nil
 }

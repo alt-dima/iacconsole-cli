@@ -74,12 +74,22 @@ var execCmd = &cobra.Command{
 
 		backendiacconsoleConfig := s.SetupBackendConfig()
 
-		s.PrepareTemp()
+		if err := s.PrepareTemp(); err != nil {
+			log.Fatalf("Failed to prepare temp directory: %v", err)
+		}
 
-		s.GenerateVarsByDims()
-		s.GenerateVarsByDimOptional("defaults")
-		s.GenerateVarsByEnvVars()
-		s.GenerateVarsByDimAndData("config", "backend", backendiacconsoleConfig)
+		if err := s.GenerateVarsByDims(); err != nil {
+			log.Fatalf("Failed to generate vars by dimensions: %v", err)
+		}
+		if err := s.GenerateVarsByDimOptional("defaults"); err != nil {
+			log.Fatalf("Failed to generate optional vars: %v", err)
+		}
+		if err := s.GenerateVarsByEnvVars(); err != nil {
+			log.Fatalf("Failed to generate vars from env: %v", err)
+		}
+		if err := s.GenerateVarsByDimAndData("config", "backend", backendiacconsoleConfig); err != nil {
+			log.Fatalf("Failed to generate backend config vars: %v", err)
+		}
 
 		//Local variables for child execution
 		forceCleanTempDir, _ := cmd.Flags().GetBool("clean")

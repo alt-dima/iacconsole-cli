@@ -28,22 +28,42 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		state.ParsedDimensions[dp.Key] = dp.Value
 	}
 
-	// 2. Setup paths (reuse existing logic from exec.go)
-	// Note: We assume the agent has access to local units/inventory if FileSync wasn't used
-	// If FileSync was used, those files should already be in a temp dir.
-
-	// For now, let's assume we use the temp dir logic
-	state.PrepareTemp()
-
-	// Generate variables
-	state.GenerateVarsByDims()
-	state.GenerateVarsByDimOptional("defaults")
-	state.GenerateVarsByEnvVars()
-
+	// 2. Setup backend config first to set StateS3Path
 	backendConfig := state.SetupBackendConfig()
-	state.GenerateVarsByDimAndData("config", "backend", backendConfig)
 
-	// 3. Prepare execution
+	// 3. Setup paths - handle error gracefully
+	if err := state.PrepareTemp(); err != nil {
+		log.Printf("Error preparing temp directory: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+
+	// 4. Generate variables - handle errors gracefully
+	if err := state.GenerateVarsByDims(); err != nil {
+		log.Printf("Error generating vars by dimensions: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+
+	if err := state.GenerateVarsByDimOptional("defaults"); err != nil {
+		log.Printf("Error generating optional vars: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+
+	if err := state.GenerateVarsByEnvVars(); err != nil {
+		log.Printf("Error generating vars from env: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+
+	if err := state.GenerateVarsByDimAndData("config", "backend", backendConfig); err != nil {
+		log.Printf("Error generating backend config vars: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+
+	// 5. Prepare execution
 	cmdToExec := state.GetStringFromViperByOrgOrDefault("cmd_to_exec")
 	if cmdToExec == "" {
 		cmdToExec = "tofu"
@@ -57,7 +77,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 	}
 	args = append(args, cmd.ExtraArgs...)
 
-	// 4. Spawn process
+	// 6. Spawn process
 	log.Printf("Agent executing: %s %s", cmdToExec, strings.Join(args, " "))
 	child := exec.Command(cmdToExec, args...)
 	child.Dir = state.CmdWorkTempDir
@@ -72,7 +92,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		return
 	}
 
-	// 5. Stream output
+	// 7. Stream output
 	var mu sync.Mutex
 	done := make(chan bool)
 	go streamPipe(conn, &mu, cmd.ID, "stdout", stdout, done)
@@ -91,7 +111,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		}
 	}
 
-	// 6. Cleanup
+	// 8. Cleanup
 	if exitCode == 0 && (cmd.Action == "apply" || cmd.Action == "destroy") {
 		os.RemoveAll(state.CmdWorkTempDir)
 	}

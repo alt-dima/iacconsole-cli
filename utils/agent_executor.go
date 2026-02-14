@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -28,17 +29,55 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		state.ParsedDimensions[dp.Key] = dp.Value
 	}
 
-	// 2. Setup backend config first to set StateS3Path
+	// Convert dimensions to DimensionsFlags format for compatibility
+	state.DimensionsFlags = make([]string, 0, len(cmd.Dimensions))
+	for _, dp := range cmd.Dimensions {
+		state.DimensionsFlags = append(state.DimensionsFlags, dp.Key+":"+dp.Value)
+	}
+
+	// 2. Setup paths from viper configs (like in exec mode)
+	unitPath, err := filepath.Abs(state.GetStringFromViperByOrgOrDefault("units_path") + "/" + state.OrgName + "/" + state.UnitName)
+	if err != nil {
+		log.Printf("Error resolving unit path: %v", err)
+		sendComplete(conn, cmd.ID, 1, err.Error())
+		return
+	}
+	state.UnitPath = unitPath
+
+	if sharedModulesPath := state.GetStringFromViperByOrgOrDefault("shared_modules_path"); sharedModulesPath != "" {
+		absPath, err := filepath.Abs(sharedModulesPath)
+		if err != nil {
+			log.Printf("Error resolving shared modules path: %v", err)
+			sendComplete(conn, cmd.ID, 1, err.Error())
+			return
+		}
+		state.SharedModulesPath = absPath
+	}
+
+	if inventoryPath := state.GetStringFromViperByOrgOrDefault("inventory_path"); inventoryPath != "" {
+		absPath, err := filepath.Abs(inventoryPath + "/" + state.OrgName)
+		if err != nil {
+			log.Printf("Error resolving inventory path: %v", err)
+			sendComplete(conn, cmd.ID, 1, err.Error())
+			return
+		}
+		state.InventoryPath = absPath
+	}
+
+	// 3. Parse unit manifest (needed before SetupBackendConfig)
+	state.ParseUnitManifest("unit_manifest.json")
+
+	// 4. Setup backend config (depends on UnitManifest)
 	backendConfig := state.SetupBackendConfig()
 
-	// 3. Setup paths - handle error gracefully
+	// 5. Prepare temp directory - handle error gracefully
 	if err := state.PrepareTemp(); err != nil {
 		log.Printf("Error preparing temp directory: %v", err)
 		sendComplete(conn, cmd.ID, 1, err.Error())
 		return
 	}
 
-	// 4. Generate variables - handle errors gracefully
+	// 6. Generate variables - handle errors gracefully
 	if err := state.GenerateVarsByDims(); err != nil {
 		log.Printf("Error generating vars by dimensions: %v", err)
 		sendComplete(conn, cmd.ID, 1, err.Error())
@@ -63,7 +102,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		return
 	}
 
-	// 5. Prepare execution
+	// 7. Prepare execution
 	cmdToExec := state.GetStringFromViperByOrgOrDefault("cmd_to_exec")
 	if cmdToExec == "" {
 		cmdToExec = "tofu"
@@ -77,7 +116,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 	}
 	args = append(args, cmd.ExtraArgs...)
 
-	// 6. Spawn process
+	// 8. Spawn process
 	log.Printf("Agent executing: %s %s", cmdToExec, strings.Join(args, " "))
 	child := exec.Command(cmdToExec, args...)
 	child.Dir = state.CmdWorkTempDir
@@ -86,13 +125,13 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 	stdout, _ := child.StdoutPipe()
 	stderr, _ := child.StderrPipe()
 
-	err := child.Start()
+	err = child.Start()
 	if err != nil {
 		sendComplete(conn, cmd.ID, 1, err.Error())
 		return
 	}
 
-	// 7. Stream output
+	// 9. Stream output
 	var mu sync.Mutex
 	done := make(chan bool)
 	go streamPipe(conn, &mu, cmd.ID, "stdout", stdout, done)
@@ -111,7 +150,7 @@ func ExecuteAgentCommand(conn *websocket.Conn, cmd AgentCommand, state *State) {
 		}
 	}
 
-	// 8. Cleanup
+	// 10. Cleanup
 	if exitCode == 0 && (cmd.Action == "apply" || cmd.Action == "destroy") {
 		os.RemoveAll(state.CmdWorkTempDir)
 	}

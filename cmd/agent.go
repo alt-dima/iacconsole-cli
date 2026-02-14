@@ -27,6 +27,9 @@ var agentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Run iacconsole-cli in agent mode",
 	Long:  `Connects to the IaCConsole server via WebSocket to receive and execute infrastructure commands.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		apiUrl := os.Getenv("IACCONSOLE_API_URL")
 		wsURL, authHeader, accountID, err := utils.ParseAPIURL(apiUrl)

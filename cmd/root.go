@@ -62,13 +62,13 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
+
+		// Find home directory.
+		if home, err := os.UserHomeDir(); err == nil {
+			viper.AddConfigPath(home)
+		}
+
 		viper.SetConfigName(".iacconsolerc")
 	}
 
